@@ -6,51 +6,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  background:#0b0b0b;
-  color:#fff;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+* {
+  box-sizing: border-box;
 }
-.box{
-  background:#121212;
-  padding:30px;
-  border-radius:15px;
-  width:100%;
-  max-width:460px;
-  box-shadow:0 0 20px rgba(0,0,0,.6);
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
-h1{text-align:center;}
-input{
-  width:100%;
-  margin-top:12px;
-  padding:10px;
-  border-radius:8px;
-  border:none;
+
+.box {
+  background: #121212;
+  padding: 30px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 0 20px rgba(0,0,0,.6);
 }
-.criteria{
-  margin-top:15px;
-  font-size:.9rem;
-  color:#ccc;
+
+h1 {
+  text-align: center;
 }
-button{
-  width:100%;
-  margin-top:20px;
-  padding:12px;
-  border:none;
-  border-radius:25px;
-  background:#1db955;
-  cursor:pointer;
+
+input:not([type="checkbox"]) {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
 }
-button:hover{background:#17a84a}
-.status{
-  text-align:center;
-  margin-top:10px;
-  font-size:.9rem;
+
+.criteria {
+  margin-top: 15px;
+  font-size: .9rem;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+.criteria label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.criteria input {
+  width: auto;
+}
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border: none;
+  border-radius: 25px;
+  background: #1db955;
+  cursor: pointer;
+  color: #fff;
+}
+
+button:hover {
+  background: #17a84a;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.status {
+  text-align: center;
+  margin-top: 10px;
+  font-size: .9rem;
 }
 </style>
 </head>
@@ -58,84 +92,112 @@ button:hover{background:#17a84a}
 <body>
 
 <div class="box">
+
   <h1>Propozycja piosenki</h1>
 
-  <input id="song" placeholder="Nazwa piosenki *">
-  <input id="album" placeholder="Album *">
-  <input id="name" placeholder="Imię (opcjonalnie)">
-  <input id="className" placeholder="Klasa (opcjonalnie)">
+  <input id="song" placeholder="Nazwa piosenki *" maxlength="150">
+  <input id="album" placeholder="Album *" maxlength="150">
+  <input id="name" placeholder="Imię (opcjonalnie)" maxlength="80">
+  <input id="className" placeholder="Klasa (opcjonalnie)" maxlength="30">
 
   <div class="criteria">
     <strong>Kryteria:</strong><br>
+
     §1. Utwór proponowany musi nie posiadać słownictwa niecenzuralnego lub musi być wersją clean/radio edit.<br>
-    §2. Utwór nie może posiadać treści kontrowersyjnych.
-    §3.Utwór nie może zawierać promowania używek i przemocy oraz innych tego typu tematów.
-    §4. W razie nieścisłosći prosimy o kontakt z przedstawicielami samorządu(Pani Katarzyna Banasik i Ewelina Kwiatkowska-Niziołek) aby uzgodnić możliwość.<br><br>
+
+    §2. Utwór nie może posiadać treści kontrowersyjnych.<br>
+
+    §3. Utwór nie może zawierać promowania używek i przemocy oraz innych tego typu tematów.<br>
+
+    §4. W razie nieścisłości prosimy o kontakt z przedstawicielami samorządu (Pani Katarzyna Banasik i Ewelina Kwiatkowska-Niziołek), aby uzgodnić możliwość.
+
     <label>
       <input type="checkbox" id="accept">
       Akceptuję kryteria
     </label>
   </div>
 
-  <button onclick="sendSong()">Wyślij</button>
+  <button id="submitBtn" onclick="sendSong()">Wyślij</button>
+
   <div class="status" id="status"></div>
+
 </div>
 
 <script>
-const WEBHOOK_URL =
-"https://discordapp.com/api/webhooks/1575559879647559811/SHptOe-Frf5FWH1lAemxD1gUnojuioarjxNMsnEMy5r043g5dWo1v1DTUt6nztOzjpgz";
+const WORKER_URL = "https://discord-proxy.TWOJ-SUBDOMAIN.workers.dev";
 
-// POPRAWNE POBRANIE ELEMENTÓW
 const songEl = document.getElementById("song");
 const albumEl = document.getElementById("album");
 const nameEl = document.getElementById("name");
 const classEl = document.getElementById("className");
 const acceptEl = document.getElementById("accept");
 const statusEl = document.getElementById("status");
+const submitBtn = document.getElementById("submitBtn");
 
-function sendSong(){
-  if(!songEl.value.trim() || !albumEl.value.trim()){
-    status("Uzupełnij wymagane pola *");
-    return;
-  }
-
-  if(!acceptEl.checked){
-    status("Musisz zaakceptować kryteria");
-    return;
-  }
-
-  fetch(WEBHOOK_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      embeds:[{
-        title:"🎵 Nowa propozycja piosenki",
-        color:0x1db954,
-        fields:[
-          {name:"Piosenka", value:songEl.value},
-          {name:"Album", value:albumEl.value},
-          {name:"Imię", value:nameEl.value || "Nie podano", inline:true},
-          {name:"Klasa", value:classEl.value || "Nie podano", inline:true},
-          {name:"Kryteria", value:"Brak wulgarności, brak kontrowersji"}
-        ],
-        footer:{text:"kryss.pl/sumbit"},
-        timestamp:new Date()
-      }]
-    })
-  }).then(()=>{
-    status("Wysłano! 🎉");
-    songEl.value="";
-    albumEl.value="";
-    nameEl.value="";
-    classEl.value="";
-    acceptEl.checked=false;
-  }).catch(()=>{
-    status("Błąd wysyłania ❌");
-  });
+function status(text) {
+  statusEl.innerText = text;
 }
 
-function status(text){
-  statusEl.innerText = text;
+async function sendSong() {
+  if (!songEl.value.trim() || !albumEl.value.trim()) {
+    status("Uzupełnij wymagane pola!");
+    return;
+  }
+
+  if (!acceptEl.checked) {
+    status("Musisz zaakceptować kryteria.");
+    return;
+  }
+
+  submitBtn.disabled = true;
+  status("Wysyłanie propozycji...");
+
+  const message = [
+    "🎵 **NOWA PROPOZYCJA PIOSENKI**",
+    "",
+    `**Piosenka:** ${songEl.value.trim()}`,
+    `**Album:** ${albumEl.value.trim()}`,
+    `**Imię:** ${nameEl.value.trim() || "Nie podano"}`,
+    `**Klasa:** ${classEl.value.trim() || "Nie podano"}`,
+    "",
+    "**Kryteria:**",
+    "Użytkownik zaakceptował wszystkie kryteria.",
+    "",
+    "━━━━━━━━━━━━━━━━",
+    "🌐 kryss.pl/submit"
+  ].join("\n");
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: message
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error("Wysyłanie nie powiodło się");
+    }
+
+    status("Wysłano propozycję! 🎉");
+
+    songEl.value = "";
+    albumEl.value = "";
+    nameEl.value = "";
+    classEl.value = "";
+    acceptEl.checked = false;
+
+  } catch (error) {
+    console.error(error);
+    status("Błąd wysyłania. Spróbuj ponownie.");
+  } finally {
+    submitBtn.disabled = false;
+  }
 }
 </script>
 
