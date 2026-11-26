@@ -58,7 +58,7 @@ button:hover{background:#17a84a}
 <body>
 
 <div class="box">
-  <h1>🎶 Propozycja piosenki</h1>
+  <h1>Propozycja piosenki</h1>
 
   <input id="song" placeholder="Nazwa piosenki *">
   <input id="album" placeholder="Album *">
@@ -67,8 +67,10 @@ button:hover{background:#17a84a}
 
   <div class="criteria">
     <strong>Kryteria:</strong><br>
-    • Brak wulgarności<br>
-    • Brak kontrowersji<br><br>
+    §1. Utwór proponowany musi nie posiadać słownictwa niecenzuralnego lub musi być wersją clean/radio edit.<br>
+    §2. Utwór nie może posiadać treści kontrowersyjnych.
+    §3.Utwór nie może zawierać promowania używek i przemocy oraz innych tego typu tematów.
+    §4. W razie nieścisłosći prosimy o kontakt z przedstawicielami samorządu(Pani Katarzyna Banasik i Ewelina Kwiatkowska-Niziołek) aby uzgodnić możliwość.<br><br>
     <label>
       <input type="checkbox" id="accept">
       Akceptuję kryteria
@@ -81,7 +83,7 @@ button:hover{background:#17a84a}
 
 <script>
 const WEBHOOK_URL =
-"https://discord.com/api/webhooks/1470898854730797068/ci_H5ZLLbKxBRks1tVfLhV81vPdn4pr-0zanZjfEwcFxEHedJUNOmfCc0HKzKBXJC0Zk";
+"https://discordapp.com/api/webhooks/1575559879647559811/SHptOe-Frf5FWH1lAemxD1gUnojuioarjxNMsnEMy5r043g5dWo1v1DTUt6nztOzjpgz";
 
 // POPRAWNE POBRANIE ELEMENTÓW
 const songEl = document.getElementById("song");
