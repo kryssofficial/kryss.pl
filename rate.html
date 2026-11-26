@@ -6,55 +6,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  background:#0b0b0b;
-  color:#fff;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+* {
+  box-sizing: border-box;
 }
-.box{
-  background:#121212;
-  padding:30px;
-  border-radius:15px;
-  width:100%;
-  max-width:420px;
-  box-shadow:0 0 20px rgba(0,0,0,.6);
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
-h1{text-align:center;}
-.stars{
-  display:flex;
-  justify-content:center;
-  font-size:2.5rem;
-  cursor:pointer;
+
+.box {
+  background: #121212;
+  padding: 30px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 20px rgba(0,0,0,.6);
 }
-.star{color:#444;transition:.2s}
-.star.active{color:#f5c542}
-input,textarea{
-  width:100%;
-  margin-top:12px;
-  padding:10px;
-  border-radius:8px;
-  border:none;
+
+h1 {
+  text-align: center;
 }
-button{
-  width:100%;
-  margin-top:18px;
-  padding:12px;
-  border:none;
-  border-radius:25px;
-  background:#1db955;
-  font-size:1rem;
-  cursor:pointer;
+
+.stars {
+  display: flex;
+  justify-content: center;
+  font-size: 2.5rem;
+  cursor: pointer;
+  gap: 5px;
 }
-button:hover{background:#17a84a}
-.status{
-  text-align:center;
-  margin-top:10px;
-  font-size:.9rem;
+
+.star {
+  color: #444;
+  transition: .2s;
+}
+
+.star.active {
+  color: #f5c542;
+}
+
+input, textarea {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: Arial, sans-serif;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  border: none;
+  border-radius: 25px;
+  background: #1db955;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+button:hover {
+  background: #17a84a;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.status {
+  text-align: center;
+  margin-top: 10px;
+  font-size: .9rem;
 }
 </style>
 </head>
@@ -72,60 +107,94 @@ button:hover{background:#17a84a}
     <span class="star">★</span>
   </div>
 
-  <input id="email" placeholder="Email (opcjonalnie – kontakt zwrotny)">
+  <input id="email" type="email" placeholder="Email (opcjonalnie – kontakt zwrotny)">
   <textarea id="comment" rows="4" placeholder="Komentarz (opcjonalnie)"></textarea>
 
-  <button onclick="sendRate()">Wyślij ocenę</button>
+  <button id="submitBtn" onclick="sendRate()">Wyślij ocenę</button>
   <div class="status" id="status"></div>
 </div>
 
 <script>
-const WEBHOOK_URL =
-"https://discordapp.com/api/webhooks/1575559879647559811/SHptOe-Frf5FWH1lAemxD1gUnojuioarjxNMsnEMy5r043g5dWo1v1DTUt6nztOzjpgz";
+const WORKER_URL = "https://discord-proxy.TWOJ-SUBDOMAIN.workers.dev";
 
 let rating = 0;
-const stars = document.querySelectorAll(".star");
 
-stars.forEach((s,i)=>{
-  s.onclick = () => {
+const stars = document.querySelectorAll(".star");
+const emailEl = document.getElementById("email");
+const commentEl = document.getElementById("comment");
+const statusEl = document.getElementById("status");
+const submitBtn = document.getElementById("submitBtn");
+
+stars.forEach((star, i) => {
+  star.onclick = () => {
     rating = i + 1;
-    stars.forEach((st,j)=>st.classList.toggle("active", j <= i));
-  }
+
+    stars.forEach((s, j) => {
+      s.classList.toggle("active", j <= i);
+    });
+  };
 });
 
-function sendRate(){
-  if(!rating){
-    status("Wybierz ilość gwiazdek ⭐");
+function status(text) {
+  statusEl.innerText = text;
+}
+
+async function sendRate() {
+  if (!rating) {
+    status("Wybierz ilość gwiazdek!");
     return;
   }
 
-  fetch(WEBHOOK_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      embeds:[{
-        title:"⭐ Nowa ocena DJ-a",
-        color:0xf5c542,
-        fields:[
-          {name:"Ocena", value:"⭐".repeat(rating)},
-          {name:"Komentarz", value:comment.value || "Brak"},
-          {name:"Email (kontakt)", value:email.value || "Nie podano"}
-        ],
-        footer:{text:"kryss.pl/rate"},
-        timestamp:new Date()
-      }]
-    })
-  }).then(()=>{
-    status("Dzięki za ocenę ❤️");
-    rating = 0;
-    stars.forEach(s=>s.classList.remove("active"));
-    comment.value="";
-    email.value="";
-  });
-}
+  if (emailEl.value && !emailEl.checkValidity()) {
+    status("Podaj poprawny adres email.");
+    return;
+  }
 
-function status(t){
-  document.getElementById("status").innerText = t;
+  submitBtn.disabled = true;
+  status("Wysyłanie oceny...");
+
+  const message = [
+    "⭐ **NOWA OCENA DJ-A**",
+    "",
+    `**Ocena:** ${"⭐".repeat(rating)} (${rating}/5)`,
+    `**Komentarz:** ${commentEl.value.trim() || "Brak"}`,
+    `**Email (kontakt):** ${emailEl.value.trim() || "Nie podano"}`,
+    "",
+    "━━━━━━━━━━━━━━━━",
+    "🌐 kryss.pl/rate"
+  ].join("\n");
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: message
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error("Wysyłanie nie powiodło się");
+    }
+
+    status("Dzięki za ocenę! ❤️");
+
+    rating = 0;
+    stars.forEach(s => s.classList.remove("active"));
+
+    commentEl.value = "";
+    emailEl.value = "";
+
+  } catch (error) {
+    console.error(error);
+    status("Błąd wysyłania oceny. Spróbuj ponownie.");
+  } finally {
+    submitBtn.disabled = false;
+  }
 }
 </script>
 
