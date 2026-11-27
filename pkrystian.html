@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Krystian Pietras</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    background: #101116;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+}
+
+.card {
+    width: 100%;
+    max-width: 650px;
+    padding: 65px 55px;
+    background: #191a22;
+    border: 1px solid #30313d;
+    border-radius: 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 70px #00000055;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #8d78ff;
+}
+
+.label {
+    color: #8d78ff;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: clamp(38px, 8vw, 64px);
+    letter-spacing: -2px;
+    line-height: 1.05;
+    margin: 0;
+    font-weight: 700;
+}
+
+.role {
+    color: #a7a7b3;
+    font-size: 22px;
+    margin-top: 18px;
+}
+
+.line {
+    width: 45px;
+    height: 3px;
+    background: #8d78ff;
+    margin: 35px 0 25px;
+}
+
+.number {
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 5px;
+}
+
+.number small {
+    display: block;
+    font-size: 10px;
+    color: #777987;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+.footer {
+    margin-top: 55px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #656674;
+}
+
+@media(max-width: 480px) {
+    .card {
+        padding: 45px 30px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <div class="label">Profil osobowy</div>
+
+    <h1>Krystian<br>Pietras</h1>
+
+    <div class="role">DJ</div>
+
+    <div class="line"></div>
+
+    <div class="number">
+        <small>NUMER IDENTYFIKACYJNY</small>
+        48564
+    </div>
+
+    <div class="footer">
+        KRYSTIAN PIETRAS
+    </div>
+</div>
+
+</body>
+</html>
